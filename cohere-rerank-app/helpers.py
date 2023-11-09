@@ -184,41 +184,31 @@ def fetch_documents_from_pinecone_index(pinecone_index, query: str, top_k: int):
     res = index.query(xq, top_k=top_k, include_metadata=True)
     docs = {x["metadata"]["text"]: i for i, x in enumerate(res["matches"])}
     print("Documents fetched successfully!")
-    return docs
+    rerank_docs = [result.document for result in rerank_response.results]
+    combined_resumes = "\n\n".join([doc["text"] for doc in rerank_docs])
 
+    prompt = f"""
+    You are an HR professional with extensive experience in evaluating resumes for various job roles.This is the task you have been assigned.
+    Task:
+    {query}
+    Based on the resumes provided below, your task is to select the top candidates and provide a detailed justification for each selection, highlighting their skills, experience, and overall fit for a general job role. Focus solely on the evaluation and selection process, and ensure your response is clear, concise, and directly related to the task at hand.
 
-# This function is used to compare the results of a vector search in Pinecone with the results after applying Cohere’s reranking.
-def compare_search_and_rerank_results(pinecone_index, cohere_client, query, top_k=25, top_n=3):
+    ---
+
+    Resumes:
+    {combined_resumes}
+
+    ---
+
+    Please provide your selections and detailed justifications below:
     """
-    Compares the results of a vector search in Pinecone with the results after applying Cohere's reranking.
-
-    i2doc = {docs[doc]: doc for doc in docs.keys()}
-    
-    # Re-rank
-    rerank_docs = co.rerank(
-        query=query,
-        documents=list(docs.keys()),
-        top_n=top_n,
-        model="rerank-english-v2.0",
-    )
-    
-    comparison_data = []
-    # Compare order change
-    for i, doc in enumerate(rerank_docs):
-        rerank_i = docs[doc.document["text"]]
-        
-        comparison_data.append({
-            'Original Rank': i,
-            'Original Text': i2doc[i],
-            'Reranked Rank': rerank_i,
-            'Reranked Text': doc.document['text']
-        })
-    return comparison_data
-
-
-# This function is specifically tailored for evaluating resumes based on a given job query.
-def evaluate_and_rerank_resumes(pinecone_index, cohere_client, query, top_k=10, rerank_top_n=5):
-    """
+    response = cohere_client.generate(prompt=prompt)
+    if response.generations:
+        print("Resumes evaluated successfully!")
+        return response.generations[0].text, None
+    else:
+        print("Failed to generate a response.")
+        return None, "Failed to generate a response."
     Evaluates resumes based on a given job query.
 
     Args:
