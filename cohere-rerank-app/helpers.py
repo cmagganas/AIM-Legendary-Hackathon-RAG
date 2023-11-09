@@ -133,10 +133,25 @@ def insert_dataset_to_pinecone_index(pinecone_index, dataset, batch_size=100):
         index: The Pinecone index to insert the data into.
         dataset: The dataset to be inserted.
         batch_size (int, optional): The size of each batch for insertion. Defaults to 100.
+    rerank_response = cohere_client.rerank(
+        query=query,
+        documents=doc_texts,
+        top_n=rerank_top_n,
+        model="rerank-english-v2.0",
+    )
     """
-    print("Inserting data to Pinecone...")
+    response = cohere_client.generate(prompt=prompt)
+    if response.generations:
+        print("Resumes evaluated successfully!")
+        return response.generations[0].text, None
+    else:
+        print("Failed to generate a response.")
+        return None, "Failed to generate a response."
 
-    # Check if the Pinecone index is empty
+    Returns:
+        str: The generated text containing the evaluations and justifications.
+        str: An error message if the response generation fails.
+    """
     index_stats = index.describe_index_stats()
     if index_stats.total_vector_count > 0:
         print("Pinecone index is not empty. No new data will be inserted.")
@@ -210,13 +225,13 @@ def fetch_documents_from_pinecone_index(pinecone_index, query: str, top_k: int):
         query (str): The job query.
         top_k (int, optional): The number of top resumes to retrieve from the initial search. Defaults to 10.
         rerank_top_n (int, optional): The number of resumes to consider after reranking. Defaults to 5.
+    """
     print("Evaluating resumes...")
     docs = fetch_documents_from_pinecone_index(pinecone_index, query, top_k=top_k)
     if not docs:
         print("No documents found.")
         return None, "No documents found."
     doc_texts = list(docs.keys())
-    """
     response = cohere_client.generate(prompt=prompt)
     if response.generations:
         print("Resumes evaluated successfully!")
