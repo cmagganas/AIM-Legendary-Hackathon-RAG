@@ -234,11 +234,6 @@ def fetch_documents_from_pinecone_index(pinecone_index, query: str, top_k: int):
         top_n=rerank_top_n,
         model="rerank-english-v2.0",
     )
-def evaluate_resumes(index, co, query, top_k=10, rerank_top_n=5):
-    """
-    Evaluates resumes based on a given job query.
-
-    Args:
         pinecone_index: The Pinecone index to perform the initial search.
         cohere_client: The Cohere reranking model.
         query (str): The job query.
