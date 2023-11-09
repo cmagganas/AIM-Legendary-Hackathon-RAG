@@ -210,6 +210,12 @@ def fetch_documents_from_pinecone_index(pinecone_index, query: str, top_k: int):
         query (str): The job query.
         top_k (int, optional): The number of top resumes to retrieve from the initial search. Defaults to 10.
         rerank_top_n (int, optional): The number of resumes to consider after reranking. Defaults to 5.
+    print("Evaluating resumes...")
+    docs = fetch_documents_from_pinecone_index(pinecone_index, query, top_k=top_k)
+    if not docs:
+        print("No documents found.")
+        return None, "No documents found."
+    doc_texts = list(docs.keys())
     """
     response = cohere_client.generate(prompt=prompt)
     if response.generations:
@@ -223,12 +229,6 @@ def fetch_documents_from_pinecone_index(pinecone_index, query: str, top_k: int):
         str: The generated text containing the evaluations and justifications.
         str: An error message if the response generation fails.
     """
-    print("Evaluating resumes...")
-    docs = fetch_documents_from_pinecone_index(pinecone_index, query, top_k=top_k)
-    if not docs:
-        print("No documents found.")
-        return None, "No documents found."
-    doc_texts = list(docs.keys())
     rerank_response = cohere_client.rerank(
         query=query,
         documents=doc_texts,
