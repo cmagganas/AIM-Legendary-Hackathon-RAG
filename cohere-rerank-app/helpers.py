@@ -243,7 +243,6 @@ def fetch_documents_from_pinecone_index(pinecone_index, query: str, top_k: int):
     Returns:
         str: The generated text containing the evaluations and justifications.
         str: An error message if the response generation fails.
-    """
     print("Evaluating resumes...")
     docs = get_docs(index, query, top_k=top_k)
     if not docs:
