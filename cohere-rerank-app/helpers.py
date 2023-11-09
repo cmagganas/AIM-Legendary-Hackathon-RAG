@@ -247,7 +247,6 @@ def evaluate_and_rerank_resumes(pinecone_index, cohere_client, query, top_k=10, 
     print("Evaluating resumes...")
     docs = get_docs(index, query, top_k=top_k)
     if not docs:
-    Compares the results of a vector search in Pinecone with the results after applying Cohere's reranking.
 
     Args:
         index: The Pinecone index to perform the initial search.
