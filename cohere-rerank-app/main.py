@@ -1,4 +1,5 @@
 import os
+
 import cohere
 import helpers
 import openai
@@ -20,12 +21,21 @@ def initialize_apis():
         return co, index
     return None, None
 
+
 # Streamlit Sidebar for API Key Input
 with st.sidebar:
-    api_key = st.text_input("Enter Pinecone API key:", value=os.getenv("PINECONE_API_KEY", ""))
-    env = st.text_input("Enter Pinecone environment:", value=os.getenv("PINECONE_ENVIRONMENT", ""))
-    openai_api_key = st.text_input("Enter OpenAI API key:", value=os.getenv("OPENAI_API_KEY", ""))
-    cohere_api_key = st.text_input("Enter Cohere API key:", value=os.getenv("COHERE_API_KEY", ""))
+    api_key = st.text_input(
+        "Enter Pinecone API key:", value=os.getenv("PINECONE_API_KEY", "")
+    )
+    env = st.text_input(
+        "Enter Pinecone environment:", value=os.getenv("PINECONE_ENVIRONMENT", "")
+    )
+    openai_api_key = st.text_input(
+        "Enter OpenAI API key:", value=os.getenv("OPENAI_API_KEY", "")
+    )
+    cohere_api_key = st.text_input(
+        "Enter Cohere API key:", value=os.getenv("COHERE_API_KEY", "")
+    )
 
     if st.button("Submit API Keys"):
         st.session_state["api_key"] = api_key
@@ -34,12 +44,19 @@ with st.sidebar:
         st.session_state["cohere_api_key"] = cohere_api_key
 
 # Main Application Flow
-if all(key in st.session_state for key in ["api_key", "env", "openai_api_key", "cohere_api_key"]):
+if all(
+    key in st.session_state
+    for key in ["api_key", "env", "openai_api_key", "cohere_api_key"]
+):
     co, index = initialize_apis()
     if co and index:
         query = st.text_input("Enter search query:")
-        top_k = st.number_input("Top K resumes to fetch:", min_value=1, max_value=50, value=10)
-        rerank_top_n = st.number_input("Top N resumes to rerank:", min_value=1, max_value=top_k, value=5)
+        top_k = st.number_input(
+            "Top K resumes to fetch:", min_value=1, max_value=50, value=10
+        )
+        rerank_top_n = st.number_input(
+            "Top N resumes to rerank:", min_value=1, max_value=top_k, value=5
+        )
 
         if st.button("Search"):
             if query:
