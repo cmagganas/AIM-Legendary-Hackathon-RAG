@@ -8,13 +8,13 @@ import tqdm
 from datasets import Dataset
 
 fake = faker.Faker()
-index_name = "coherererank"
+pinecone_index_name = "coherererank"
 dimension = 1536
 embed_model = "text-embedding-ada-002"
 
 
 # In this function, we're setting up our connection to Pinecone, a vector database that helps us in storing and querying vectorized data.
-def initialize_pinecone(api_key, env, index_name, dimension):
+def initialize_pinecone_index(api_key, env, pinecone_index_name, dimension):
     """
     Initializes a Pinecone index for similarity search.
 
@@ -41,7 +41,7 @@ def initialize_pinecone(api_key, env, index_name, dimension):
 
 
 # Generates a synthetic resume by creating a dictionary with randomly generated data for fields such as name, job, company, skills, experience, and education.
-def generate_resume():
+def generate_synthetic_resume():
     """
     Generates a synthetic resume with various fields filled with random, but plausible data.
 
@@ -62,7 +62,7 @@ def generate_resume():
 
 
 # In this function, we are focusing on creating a dataset of synthetic resumes. This is particularly useful for simulating a real-world scenario where you have a collection of resumes to work with.
-def create_dataset(num_resumes=1000, chunk_size=800):
+def create_synthetic_resumes_dataset(num_resumes=1000, chunk_size=800):
     """
     Creates a dataset of synthetic resumes.
 
@@ -108,7 +108,7 @@ def create_dataset(num_resumes=1000, chunk_size=800):
 
 
 # This function is crucial for converting our text data into numerical vectors, which is a format that can be understood and processed by machine learning models.
-def embed(docs: list[str]) -> list[list[float]]:
+def embed_documents(docs: list[str]) -> list[list[float]]:
     """
     Embeds a list of documents using an embedding model.
 
@@ -125,7 +125,7 @@ def embed(docs: list[str]) -> list[list[float]]:
 
 
 # In this function, we are focused on inserting our dataset into the Pinecone index.
-def insert_to_pinecone(index, dataset, batch_size=100):
+def insert_dataset_to_pinecone_index(pinecone_index, dataset, batch_size=100):
     """
     Inserts a dataset into the Pinecone index.
 
@@ -167,7 +167,7 @@ def insert_to_pinecone(index, dataset, batch_size=100):
 
 
 # In this function, we are querying the Pinecone index to fetch documents that are most relevant to a given query.
-def get_docs(index, query: str, top_k: int):
+def fetch_documents_from_pinecone_index(pinecone_index, query: str, top_k: int):
     """
     Fetches documents from a Pinecone index based on a query.
 
@@ -188,7 +188,7 @@ def get_docs(index, query: str, top_k: int):
 
 
 # This function is used to compare the results of a vector search in Pinecone with the results after applying Cohere’s reranking.
-def compare(index, co, query, top_k=25, top_n=3):
+def compare_search_and_rerank_results(pinecone_index, cohere_client, query, top_k=25, top_n=3):
     """
     Compares the results of a vector search in Pinecone with the results after applying Cohere's reranking.
 
@@ -229,6 +229,38 @@ def compare(index, co, query, top_k=25, top_n=3):
 
 
 # This function is specifically tailored for evaluating resumes based on a given job query.
+def evaluate_and_rerank_resumes(pinecone_index, cohere_client, query, top_k=10, rerank_top_n=5):
+    """
+    Evaluates resumes based on a given job query.
+
+    Args:
+        index: The Pinecone index to perform the initial search.
+        co: The Cohere reranking model.
+        query (str): The job query.
+        top_k (int, optional): The number of top resumes to retrieve from the initial search. Defaults to 10.
+        rerank_top_n (int, optional): The number of resumes to consider after reranking. Defaults to 5.
+
+    Returns:
+        str: The generated text containing the evaluations and justifications.
+        str: An error message if the response generation fails.
+    """
+    print("Evaluating resumes...")
+    docs = get_docs(index, query, top_k=top_k)
+    if not docs:
+    Compares the results of a vector search in Pinecone with the results after applying Cohere's reranking.
+
+    Args:
+        index: The Pinecone index to perform the initial search.
+        co: The Cohere reranking model.
+        query (str): The query string.
+        top_k (int, optional): The number of top documents to retrieve from the initial search. Defaults to 25.
+        top_n (int, optional): The number of documents to return after reranking. Defaults to 3.
+
+    Returns:
+        list[dict]: A list of dictionaries representing the comparison data, including original rank, original text, reranked rank, and reranked text.
+    """
+    # Get vec search results
+    docs = get_docs(index, query, top_k=top_k)
 def evaluate_resumes(index, co, query, top_k=10, rerank_top_n=5):
     """
     Evaluates resumes based on a given job query.
