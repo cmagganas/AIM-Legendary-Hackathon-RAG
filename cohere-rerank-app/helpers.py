@@ -12,6 +12,7 @@ index_name = "coherererank"
 dimension = 1536
 embed_model = "text-embedding-ada-002"
 
+
 # In this function, we're setting up our connection to Pinecone, a vector database that helps us in storing and querying vectorized data.
 def initialize_pinecone(api_key, env, index_name, dimension):
     """
@@ -38,6 +39,7 @@ def initialize_pinecone(api_key, env, index_name, dimension):
     print("Pinecone initialized successfully!")
     return index
 
+
 # Generates a synthetic resume by creating a dictionary with randomly generated data for fields such as name, job, company, skills, experience, and education.
 def generate_resume():
     """
@@ -57,6 +59,7 @@ def generate_resume():
     }
     print("Synthetic resume generated successfully!")
     return resume
+
 
 # In this function, we are focusing on creating a dataset of synthetic resumes. This is particularly useful for simulating a real-world scenario where you have a collection of resumes to work with.
 def create_dataset(num_resumes=1000, chunk_size=800):
@@ -103,6 +106,7 @@ def create_dataset(num_resumes=1000, chunk_size=800):
     print("Dataset created successfully!")
     return formatted_dataset
 
+
 # This function is crucial for converting our text data into numerical vectors, which is a format that can be understood and processed by machine learning models.
 def embed(docs: list[str]) -> list[list[float]]:
     """
@@ -118,6 +122,7 @@ def embed(docs: list[str]) -> list[list[float]]:
     res = openai.Embedding.create(input=docs, engine=embed_model)
     print("Documents embedded successfully!")
     return [x["embedding"] for x in res["data"]]
+
 
 # In this function, we are focused on inserting our dataset into the Pinecone index.
 def insert_to_pinecone(index, dataset, batch_size=100):
@@ -160,6 +165,7 @@ def insert_to_pinecone(index, dataset, batch_size=100):
 
     print("New data inserted to Pinecone successfully!")
 
+
 # In this function, we are querying the Pinecone index to fetch documents that are most relevant to a given query.
 def get_docs(index, query: str, top_k: int):
     """
@@ -180,6 +186,7 @@ def get_docs(index, query: str, top_k: int):
     print("Documents fetched successfully!")
     return docs
 
+
 # This function is used to compare the results of a vector search in Pinecone with the results after applying Cohere’s reranking.
 def compare(index, co, query, top_k=25, top_n=3):
     """
@@ -198,7 +205,7 @@ def compare(index, co, query, top_k=25, top_n=3):
     # Get vec search results
     docs = get_docs(index, query, top_k=top_k)
     i2doc = {docs[doc]: doc for doc in docs.keys()}
-    
+
     # Re-rank
     rerank_docs = co.rerank(
         query=query,
@@ -206,18 +213,20 @@ def compare(index, co, query, top_k=25, top_n=3):
         top_n=top_n,
         model="rerank-english-v2.0",
     )
-    
+
     comparison_data = []
     # Compare order change
     for i, doc in enumerate(rerank_docs):
         rerank_i = docs[doc.document["text"]]
-        
-        comparison_data.append({
-            'Original Rank': i,
-            'Original Text': i2doc[i],
-            'Reranked Rank': rerank_i,
-            'Reranked Text': doc.document['text']
-        })
+
+        comparison_data.append(
+            {
+                "Original Rank": i,
+                "Original Text": i2doc[i],
+                "Reranked Rank": rerank_i,
+                "Reranked Text": doc.document["text"],
+            }
+        )
     return comparison_data
 
 
@@ -274,4 +283,3 @@ def evaluate_resumes(index, co, query, top_k=10, rerank_top_n=5):
     else:
         print("Failed to generate a response.")
         return None, "Failed to generate a response."
-    
