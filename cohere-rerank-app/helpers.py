@@ -192,18 +192,6 @@ def compare_search_and_rerank_results(pinecone_index, cohere_client, query, top_
     """
     Compares the results of a vector search in Pinecone with the results after applying Cohere's reranking.
 
-    Args:
-        index: The Pinecone index to perform the initial search.
-        co: The Cohere reranking model.
-        query (str): The query string.
-        top_k (int, optional): The number of top documents to retrieve from the initial search. Defaults to 25.
-        top_n (int, optional): The number of documents to return after reranking. Defaults to 3.
-
-    Returns:
-        list[dict]: A list of dictionaries representing the comparison data, including original rank, original text, reranked rank, and reranked text.
-    """
-    # Get vec search results
-    docs = get_docs(index, query, top_k=top_k)
     i2doc = {docs[doc]: doc for doc in docs.keys()}
     
     # Re-rank
@@ -234,8 +222,8 @@ def evaluate_and_rerank_resumes(pinecone_index, cohere_client, query, top_k=10, 
     Evaluates resumes based on a given job query.
 
     Args:
-        index: The Pinecone index to perform the initial search.
-        co: The Cohere reranking model.
+        pinecone_index: The Pinecone index to perform the initial search.
+        cohere_client: The Cohere reranking model.
         query (str): The job query.
         top_k (int, optional): The number of top resumes to retrieve from the initial search. Defaults to 10.
         rerank_top_n (int, optional): The number of resumes to consider after reranking. Defaults to 5.
@@ -245,10 +233,8 @@ def evaluate_and_rerank_resumes(pinecone_index, cohere_client, query, top_k=10, 
         str: An error message if the response generation fails.
     """
     print("Evaluating resumes...")
-    docs = get_docs(index, query, top_k=top_k)
+    docs = fetch_documents_from_pinecone_index(pinecone_index, query, top_k=top_k)
     if not docs:
-
-    Args:
         index: The Pinecone index to perform the initial search.
         co: The Cohere reranking model.
         query (str): The query string.
@@ -265,8 +251,8 @@ def evaluate_resumes(index, co, query, top_k=10, rerank_top_n=5):
     Evaluates resumes based on a given job query.
 
     Args:
-        index: The Pinecone index to perform the initial search.
-        co: The Cohere reranking model.
+        pinecone_index: The Pinecone index to perform the initial search.
+        cohere_client: The Cohere reranking model.
         query (str): The job query.
         top_k (int, optional): The number of top resumes to retrieve from the initial search. Defaults to 10.
         rerank_top_n (int, optional): The number of resumes to consider after reranking. Defaults to 5.
