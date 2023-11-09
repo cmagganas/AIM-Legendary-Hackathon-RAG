@@ -202,13 +202,6 @@ def fetch_documents_from_pinecone_index(pinecone_index, query: str, top_k: int):
 
     Please provide your selections and detailed justifications below:
     """
-    response = cohere_client.generate(prompt=prompt)
-    if response.generations:
-        print("Resumes evaluated successfully!")
-        return response.generations[0].text, None
-    else:
-        print("Failed to generate a response.")
-        return None, "Failed to generate a response."
     Evaluates resumes based on a given job query.
 
     Args:
@@ -217,6 +210,14 @@ def fetch_documents_from_pinecone_index(pinecone_index, query: str, top_k: int):
         query (str): The job query.
         top_k (int, optional): The number of top resumes to retrieve from the initial search. Defaults to 10.
         rerank_top_n (int, optional): The number of resumes to consider after reranking. Defaults to 5.
+    """
+    response = cohere_client.generate(prompt=prompt)
+    if response.generations:
+        print("Resumes evaluated successfully!")
+        return response.generations[0].text, None
+    else:
+        print("Failed to generate a response.")
+        return None, "Failed to generate a response."
 
     Returns:
         str: The generated text containing the evaluations and justifications.
