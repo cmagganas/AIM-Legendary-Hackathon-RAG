@@ -2,6 +2,7 @@ import random
 import time
 import faker
 import pinecone
+import openai
 from datasets import Dataset
 
 fake = faker.Faker()
