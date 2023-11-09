@@ -1,14 +1,16 @@
 import random
 import time
+
 import faker
-import pinecone
 import openai
+import pinecone
 from datasets import Dataset
 
 fake = faker.Faker()
 index_name = "coherererank"
 dimension = 1536
 embed_model = "text-embedding-ada-002"
+
 
 # In this function, we're setting up our connection to Pinecone, a vector database that helps us in storing and querying vectorized data.
 def initialize_pinecone(api_key, env, index_name, dimension):
@@ -202,7 +204,7 @@ def compare(index, co, query, top_k=25, top_n=3):
     # Get vec search results
     docs = get_docs(index, query, top_k=top_k)
     i2doc = {docs[doc]: doc for doc in docs.keys()}
-    
+
     # Re-rank
     rerank_docs = co.rerank(
         query=query,
@@ -210,18 +212,20 @@ def compare(index, co, query, top_k=25, top_n=3):
         top_n=top_n,
         model="rerank-english-v2.0",
     )
-    
+
     comparison_data = []
     # Compare order change
     for i, doc in enumerate(rerank_docs):
         rerank_i = docs[doc.document["text"]]
-        
-        comparison_data.append({
-            'Original Rank': i,
-            'Original Text': i2doc[i],
-            'Reranked Rank': rerank_i,
-            'Reranked Text': doc.document['text']
-        })
+
+        comparison_data.append(
+            {
+                "Original Rank": i,
+                "Original Text": i2doc[i],
+                "Reranked Rank": rerank_i,
+                "Reranked Text": doc.document["text"],
+            }
+        )
     return comparison_data
 
 
@@ -278,4 +282,3 @@ def evaluate_resumes(index, co, query, top_k=10, rerank_top_n=5):
     else:
         print("Failed to generate a response.")
         return None, "Failed to generate a response."
-    
