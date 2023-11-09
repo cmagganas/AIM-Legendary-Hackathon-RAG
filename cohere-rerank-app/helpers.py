@@ -1,11 +1,16 @@
 import random
 import time
+import faker
+import pinecone
 from datasets import Dataset
 
+fake = faker.Faker()
+index_name = "coherererank"
+dimension = 1536
 embed_model = "text-embedding-ada-002"
 
 # In this function, we're setting up our connection to Pinecone, a vector database that helps us in storing and querying vectorized data.
-def initialize_pinecone(api_key, env):
+def initialize_pinecone(api_key, env, index_name, dimension):
     """
     Initializes a Pinecone index for similarity search.
 
