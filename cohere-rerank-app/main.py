@@ -2,7 +2,7 @@ import os
 import cohere
 import helpers
 import openai
-# pandas import removed as it is unused
+import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
 
