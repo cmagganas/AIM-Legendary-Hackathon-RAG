@@ -248,7 +248,7 @@ def evaluate_resumes(index, co, query, top_k=10, rerank_top_n=5):
     """
     print("Evaluating resumes...")
     docs = get_docs(index, query, top_k=top_k)
-    if not docs:
+if not docs:
         print("No documents found.")
         return None, "No documents found."
     doc_texts = list(docs.keys())
@@ -261,21 +261,21 @@ def evaluate_resumes(index, co, query, top_k=10, rerank_top_n=5):
     rerank_docs = [result.document for result in rerank_response.results]
     combined_resumes = "\n\n".join([doc["text"] for doc in rerank_docs])
 
-    prompt = f"""
-    You are an HR professional with extensive experience in evaluating resumes for various job roles.This is the task you have been assigned.
-    Task:
-    {query}
-    Based on the resumes provided below, your task is to select the top candidates and provide a detailed justification for each selection, highlighting their skills, experience, and overall fit for a general job role. Focus solely on the evaluation and selection process, and ensure your response is clear, concise, and directly related to the task at hand.
+prompt = f"""
+You are an HR professional with extensive experience in evaluating resumes for various job roles.This is the task you have been assigned.
+Task:
+{query}
+Based on the resumes provided below, your task is to select the top candidates and provide a detailed justification for each selection, highlighting their skills, experience, and overall fit for a general job role. Focus solely on the evaluation and selection process, and ensure your response is clear, concise, and directly related to the task at hand.
 
-    ---
+---
 
-    Resumes:
-    {combined_resumes}
+Resumes:
+{combined_resumes}
 
-    ---
+---
 
-    Please provide your selections and detailed justifications below:
-    """
+Please provide your selections and detailed justifications below:
+"""
     response = co.generate(prompt=prompt)
     if response.generations:
         print("Resumes evaluated successfully!")
